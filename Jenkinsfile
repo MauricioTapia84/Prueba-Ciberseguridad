@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'python:3.12-slim'
+      args '-u root:root'
+    }
+  }
   environment {
     PYTHON_ENV = 'venv'
   }
@@ -9,22 +14,21 @@ pipeline {
         checkout scm
       }
     }
-    stage('Build & Test (in Docker)') {
+    stage('Build') {
       steps {
-        // Ejecutar todo dentro de un contenedor python:3.12-slim para no necesitar el plugin Docker Pipeline
-        sh '''
-        docker run --rm -u $(id -u):$(id -g) -v "$PWD":/workspace -w /workspace python:3.12-slim bash -lc "\
-          python3 -m venv $PYTHON_ENV && \
-          . $PYTHON_ENV/bin/activate && \
-          pip install --upgrade pip && \
-          pip install -r Prueba-Ciberseguridad/requirements.txt && \
-          mkdir -p Prueba-Ciberseguridad/reports && \
-          pytest -q --junitxml=Prueba-Ciberseguridad/reports/test-results.xml
-        "
-        '''
-        // Publicar resultados JUnit y artefactos
+        sh 'python3 -m venv $PYTHON_ENV'
+        sh '. $PYTHON_ENV/bin/activate && pip install --upgrade pip && pip install -r Prueba-Ciberseguridad/requirements.txt'
+      }
+    }
+    stage('Test') {
+      steps {
+        sh '. $PYTHON_ENV/bin/activate && pytest -q --junitxml=Prueba-Ciberseguridad/reports/test-results.xml'
         junit 'Prueba-Ciberseguridad/reports/test-results.xml'
-        archiveArtifacts artifacts: 'Prueba-Ciberseguridad/reports/**', allowEmptyArchive: true
+      }
+      post {
+        always {
+          archiveArtifacts artifacts: 'Prueba-Ciberseguridad/reports/**', allowEmptyArchive: true
+        }
       }
     }
     stage('Deploy') {

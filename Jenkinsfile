@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'python:3.12-slim'
+      args '-u root:root'
+    }
+  }
   environment {
     PYTHON_ENV = 'venv'
   }
@@ -11,14 +16,16 @@ pipeline {
     }
     stage('Build') {
       steps {
-        sh 'python3 -m venv $PYTHON_ENV || true'
-        sh '. $PYTHON_ENV/bin/activate && pip install -r requirements.txt || true'
+        // Crear entorno virtual e instalar dependencias
+        sh 'python3 -m venv $PYTHON_ENV'
+        sh '. $PYTHON_ENV/bin/activate && pip install --upgrade pip && pip install -r Prueba-Ciberseguridad/requirements.txt'
       }
     }
     stage('Test') {
       steps {
-        sh '. $PYTHON_ENV/bin/activate && pytest -q || true'
-        junit '**/test-results/*.xml'
+        // Ejecutar tests y generar reporte JUnit en la carpeta reports
+        sh '. $PYTHON_ENV/bin/activate && pytest -q --junitxml=Prueba-Ciberseguridad/reports/test-results.xml'
+        junit 'Prueba-Ciberseguridad/reports/test-results.xml'
       }
       post {
         always {

@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'python:3.12-slim'
-      args '-u root:root'
-    }
-  }
+  agent any
 
   environment {
     REPORTS_DIR = 'Prueba-Ciberseguridad/reports'

@@ -1,0 +1,2 @@
+IMAGE                         ID             DISK USAGE   CONTENT SIZE   EXTRA
+pruebaciberseguridad:latest   fcbe147bd382        318MB         80.8MB        

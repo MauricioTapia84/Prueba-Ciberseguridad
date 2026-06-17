@@ -1,0 +1,9 @@
+total 28
+drwxrwxr-x 2 mauricio mauricio 4096 jun 16 23:53 .
+drwxrwxr-x 3 mauricio mauricio 4096 jun 16 23:52 ..
+-rw-rw-r-- 1 mauricio mauricio 2220 jun 16 23:52 docker-images-all.txt
+-rw-rw-r-- 1 mauricio mauricio  158 jun 16 23:52 docker-image.txt
+-rw-rw-r-- 1 mauricio mauricio   71 jun 16 23:52 docker-ps.txt
+-rw-rw-r-- 1 mauricio mauricio    0 jun 16 23:53 ls-evidence.txt
+-rw-rw-r-- 1 mauricio mauricio 3003 jun 16 23:53 run-steps-output.txt
+-rw-r--r-- 1 mauricio mauricio  327 jun 16 23:52 test-results.xml

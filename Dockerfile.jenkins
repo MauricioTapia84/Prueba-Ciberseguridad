@@ -1,23 +1,21 @@
 FROM jenkins/jenkins:lts
+
 USER root
 
-# Instala git y el cliente docker (sin daemon). Usamos --no-install-recommends para mantener la imagen ligera.
-RUN apt-get update && \
-        apt-get install -y --no-install-recommends git ca-certificates curl gnupg lsb-release && \
-        # instalar docker-ce-cli desde repositorio oficial para asegurar el cliente docker
-        mkdir -p /etc/apt/keyrings && \
-        curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
-            > /etc/apt/sources.list.d/docker.list && \
-        apt-get update && \
-        apt-get install -y --no-install-recommends docker-ce-cli && \
-        # asegurar que exista el grupo docker y añadir el usuario jenkins a ese grupo
-        groupadd -f docker && \
-        usermod -aG docker jenkins || true && \
-        apt-get clean && rm -rf /var/lib/apt/lists/* /etc/apt/keyrings/docker.gpg
+# Install docker CLI (uses distro packages inside the image)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl gnupg2 lsb-release \
+    && apt-get install -y --no-install-recommends docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create an auxiliary group matching the host docker GID so the container
+# user can access the mounted socket even if an internal 'docker' group exists
+ARG DOCKER_GID=985
+RUN groupadd -g ${DOCKER_GID} host_docker || true \
+    && usermod -aG host_docker jenkins || true
 
 USER jenkins
 
 ENV DOCKER_HOST=unix:///var/run/docker.sock
 
-# Nota: montaremos el socket /var/run/docker.sock al ejecutar el contenedor.
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/jenkins.sh"]

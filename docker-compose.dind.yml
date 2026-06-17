@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  dind:
+    image: docker:24-dind
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=
+    networks:
+      - cicd
+
+  jenkins:
+    image: jenkins-with-docker
+    depends_on:
+      - dind
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      # Point Jenkins to the DinD daemon by container name
+      - DOCKER_HOST=tcp://dind:2375
+    networks:
+      - cicd
+
+volumes:
+  jenkins_home:
+
+networks:
+  cicd:
+    driver: bridge

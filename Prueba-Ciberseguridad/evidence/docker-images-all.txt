@@ -1,0 +1,20 @@
+IMAGE                                                         ID             DISK USAGE   CONTENT SIZE   EXTRA
+docker-api:latest                                             96d1624a6274        250MB         60.2MB   U    
+docker-dashboard:latest                                       bdd4d321d179        900MB          196MB   U    
+docker-etl-runner:latest                                      483a36063c49        429MB         98.9MB   U    
+docker/welcome-to-docker:latest                               c4d56c24da4f       22.2MB         6.03MB        
+docker:24-dind                                                9b17a9f25adf        480MB          127MB        
+fadebooker-backend:latest                                     de87430de128        475MB          106MB        
+fadebookerregistry.azurecr.io/fadebooker-backend:latest       e9561559edff        587MB          130MB        
+fadebookerregistry.azurecr.io/fadebooker-frontend:latest      18772993336d       95.6MB         27.1MB        
+fadebookerregistrypro.azurecr.io/fadebooker-backend:latest    de87430de128        475MB          106MB        
+fadebookerregistrypro.azurecr.io/fadebooker-frontend:latest   c9df8da78a07       95.7MB         27.2MB        
+grafana/grafana:9.5.0                                         eb08867312c6        423MB         88.8MB   U    
+hello-world:latest                                            f9078146db2e       25.9kB         9.49kB   U    
+jenkins-with-docker:latest                                    4be6d13f6781        897MB          318MB        
+jenkins/jenkins:lts                                           e82bbdcffb63        810MB          292MB        
+jgraph/drawio:14.9.4                                          396f7915cb22        795MB          224MB        
+my-jenkins:with-docker                                        ec78a65ba845       1.13GB          374MB        
+postgres:15                                                   8f70a8af16ac        633MB          164MB   U    
+pruebaciberseguridad:latest                                   fcbe147bd382        318MB         80.8MB        
+wrestl-api:local                                              52bad1d7ffbf        250MB         60.2MB        

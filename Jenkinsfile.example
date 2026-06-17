@@ -1,0 +1,15 @@
+pipeline {
+  agent any
+  stages {
+    stage('Build inside docker') {
+      steps {
+        script {
+          // Usa el docker disponible en el agente
+          sh 'docker --version'
+          sh 'docker pull python:3.12-slim'
+          sh 'docker run --rm python:3.12-slim python -V'
+        }
+      }
+    }
+  }
+}

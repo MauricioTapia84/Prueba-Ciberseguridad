@@ -1,0 +1,16 @@
+Requirement already satisfied: pip in ./venv/lib/python3.13/site-packages (26.1.2)
+Requirement already satisfied: pytest in ./venv/lib/python3.13/site-packages (from -r requirements.txt (line 1)) (9.1.0)
+Requirement already satisfied: iniconfig>=1.0.1 in ./venv/lib/python3.13/site-packages (from pytest->-r requirements.txt (line 1)) (2.3.0)
+Requirement already satisfied: packaging>=22 in ./venv/lib/python3.13/site-packages (from pytest->-r requirements.txt (line 1)) (26.2)
+Requirement already satisfied: pluggy<2,>=1.5 in ./venv/lib/python3.13/site-packages (from pytest->-r requirements.txt (line 1)) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in ./venv/lib/python3.13/site-packages (from pytest->-r requirements.txt (line 1)) (2.20.0)
+.                                                                        [100%]
+1 passed in 0.06s
+docker no está disponible: se omite build/run/scan. Instala Docker para ejecutar esas etapas.
+Iniciando app en puerto host 8080 (container:8080)
+docker no está disponible: no se puede iniciar el contenedor.
+ZAP not available (PATH/Flatpak/Docker). Skipping security scan.
+./run-steps.sh: línea 129: docker: orden no encontrada
+total 8
+-rw-r--r-- 1 mauricio mauricio  327 jun 16 23:56 test-results.xml
+drwxrwxr-x 2 mauricio mauricio 4096 jun 15 19:36 zap

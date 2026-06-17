@@ -1,0 +1,7 @@
+reports/
+reports/test-results.xml
+reports/zap/
+.env
+venv/
+__pycache__/
+*.pyc

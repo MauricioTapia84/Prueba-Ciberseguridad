@@ -2,73 +2,107 @@ pipeline {
   agent any
 
   environment {
-    REPORTS_DIR = 'Prueba-Ciberseguridad/reports'
+    REPORTS_DIR = 'reports'
     DOCKER_IMAGE = 'pruebaciberseguridad:latest'
+    ZAP_IMAGE = 'ghcr.io/zaproxy/zaproxy:stable'
+    NETWORK = 'prueba-ciberseguridad_devsecops_net'
+    APP_URL = 'http://app-under-test:8080'
+  }
+
+  options {
+    ansiColor('xterm')
+    timeout(time: 60, unit: 'MINUTES')
+    buildDiscarder(logRotator(numToKeepStr: '10'))
   }
 
   stages {
     stage('Checkout') {
-      steps { checkout scm }
+      steps {
+        checkout scm
+      }
     }
 
-    stage('Setup') {
-      steps { sh 'mkdir -p ${REPORTS_DIR}/zap' }
+    stage('Prepare') {
+      steps {
+        sh 'mkdir -p ${REPORTS_DIR}/zap'
+      }
     }
 
     stage('Build') {
       steps {
-        sh 'python3 -m venv venv || true'
-        sh '. venv/bin/activate && pip install --upgrade pip || true'
-        sh '. venv/bin/activate && pip install -r Prueba-Ciberseguridad/requirements.txt || true'
-        sh 'docker build -t ${DOCKER_IMAGE} Prueba-Ciberseguridad || true'
+        sh '''
+          set -eux
+          python3 -m venv venv
+          . venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          docker build -t ${DOCKER_IMAGE} .
+        '''
       }
     }
 
-    stage('Test') {
+    stage('Unit Tests') {
       steps {
-        sh '. venv/bin/activate && pytest -q --junitxml=${REPORTS_DIR}/test-results.xml || true'
+        sh '''
+          set -eux
+          . venv/bin/activate
+          pytest -q --junitxml=${REPORTS_DIR}/test-results.xml
+        '''
         junit '${REPORTS_DIR}/test-results.xml'
       }
-      post { always { archiveArtifacts artifacts: '${REPORTS_DIR}/**', allowEmptyArchive: true } }
     }
 
-    stage('Security Scan (OWASP ZAP)') {
+    stage('DAST Scan') {
       steps {
-        script {
-          sh 'docker rm -f app-under-test || true'
-          sh 'docker run -d --name app-under-test -p 8080:8080 ${DOCKER_IMAGE} || true'
-          sh 'echo "Esperando a que la aplicación responda en http://localhost:8080..."'
-          sh 'for i in 1 2 3 4 5 6 7 8 9 10; do if curl -sSf http://localhost:8080 >/dev/null 2>&1; then echo "app disponible" && break; else echo "esperando... ($i)"; sleep 1; fi; done'
-          sh 'ZAP_REPORT="zap-report-$(date +%Y%m%d-%H%M%S).html"'
-          sh 'docker run --rm -v $PWD/${REPORTS_DIR}/zap:/zap/wrk:rw owasp/zap2docker-stable zap-baseline.py -t http://localhost:8080 -r /zap/wrk/${ZAP_REPORT} || true'
-          sh 'ZAP_FILE=$(ls -t ${REPORTS_DIR}/zap/*.html 2>/dev/null | head -n1 || true)'
-          sh 'if [ -n "$ZAP_FILE" ]; then cp "$ZAP_FILE" ${REPORTS_DIR}/zap-report.html || true; fi'
-          sh 'docker rm -f app-under-test || true'
-        }
+        sh '''
+          set -eux
+          docker rm -f app-under-test || true
+          docker run -d --name app-under-test --network ${NETWORK} -p 8081:8080 ${DOCKER_IMAGE}
+
+          for i in $(seq 1 30); do
+            if curl -sSf http://app-under-test:8080/ >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+
+          docker run --rm --network ${NETWORK} -v $PWD/${REPORTS_DIR}/zap:/zap/wrk:rw ${ZAP_IMAGE} zap-full-scan.py \
+            -t ${APP_URL} \
+            -r /zap/wrk/zap-full-report.html \
+            -J /zap/wrk/zap-full-report.json \
+            -x /zap/wrk/zap-full-report.xml
+        '''
       }
       post {
         always {
-          archiveArtifacts artifacts: '${REPORTS_DIR}/**', allowEmptyArchive: true
-          publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: '${REPORTS_DIR}/zap', reportFiles: 'zap-report.html,zap-report-local.html', reportName: 'OWASP ZAP Report'])
+          sh 'docker rm -f app-under-test || true'
         }
       }
     }
 
-    stage('Deploy') {
-      when { branch 'main' }
+    stage('Verify Image') {
+      when {
+        branch 'main'
+      }
       steps {
-        echo 'Deploying to staging...'
-        sh 'docker build -t ${DOCKER_IMAGE} Prueba-Ciberseguridad || true'
-        sh 'docker rm -f pruebaciberseguridad || true'
-        sh 'docker run -d --name pruebaciberseguridad -p 8000:8000 ${DOCKER_IMAGE} || true'
+        sh '''
+          set -eux
+          docker image inspect ${DOCKER_IMAGE}
+          echo "Docker image ${DOCKER_IMAGE} is ready."
+        '''
       }
     }
   }
 
   post {
-    success { echo 'Pipeline succeeded' }
-    failure { echo 'Pipeline failed' }
-    always { archiveArtifacts artifacts: '${REPORTS_DIR}/**', allowEmptyArchive: true }
+    always {
+      archiveArtifacts artifacts: '${REPORTS_DIR}/**', allowEmptyArchive: true
+    }
+    success {
+      echo 'Pipeline completed successfully.'
+    }
+    failure {
+      echo 'Pipeline failed. Revisa los artefactos en reports/'.
+    }
   }
 }
-              sh 'docker build -t ${DOCKER_IMAGE} Prueba-Ciberseguridad || true'

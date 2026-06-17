@@ -1,21 +1,13 @@
 FROM jenkins/jenkins:lts
-
 USER root
+RUN apt-get update && \
+    apt-get install -y python3 python3-venv python3-pip docker.io jq curl procps && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install docker CLI (uses distro packages inside the image)
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl gnupg2 lsb-release \
-    && apt-get install -y --no-install-recommends docker.io \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create an auxiliary group matching the host docker GID so the container
-# user can access the mounted socket even if an internal 'docker' group exists
+# Create an auxiliary group matching the host docker GID so the Jenkins user can access the mounted socket
 ARG DOCKER_GID=985
 RUN groupadd -g ${DOCKER_GID} host_docker || true \
     && usermod -aG host_docker jenkins || true
 
 USER jenkins
-
 ENV DOCKER_HOST=unix:///var/run/docker.sock
-
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/jenkins.sh"]

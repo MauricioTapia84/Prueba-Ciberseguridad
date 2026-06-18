@@ -211,19 +211,55 @@ Crea un pipeline de CI/CD en Jenkins que incluya las siguientes etapas: construc
 
 ![1781790469408](image/entrega_prueba-ciberseguridad/1781790469408.png)
 
-Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo para identificar y mitigar vulnerabilidades. (Pegar Pantallazos)
+#### Revisiones de seguridad en el ciclo de vida (SDLC)
 
-Corrige cualquier vulnerabilidad encontrada en el código proporcionado. (Pegar Pantallazos)
+**Pregunta:** Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo para identificar y mitigar vulnerabilidades. (Pegar Pantallazos)
 
-Documenta todas las revisiones de seguridad realizadas, las vulnerabilidades identificadas y las correcciones aplicadas, incluyendo detalles de cómo fueron mitigadas. (Pegar Pantallazos)
+**Respuesta:**
+Para aplicar seguridad continua, se configuró un pipeline de integración en Jenkins que realiza análisis de vulnerabilidades automatizados. En el último análisis DAST ejecutado contra el código proporcionado, se identificaron las siguientes vulnerabilidades en la etapa de pruebas dinámicas (ver detalle de reportes en la carpeta `reports/zap/`):
+1.  **Falta de cabeceras de Content Security Policy (CSP):** Permite ataques de inyección de código y Cross-Site Scripting (XSS).
+2.  **Falta de cabeceras de protección contra Clickjacking (X-Frame-Options):** Permite a atacantes cargar la aplicación dentro de frames maliciosos.
+3.  **Fuga de información de la versión del servidor en la cabecera `Server`:** Expone que se está utilizando `SimpleHTTP/0.6 Python/3.12.13`, facilitando que atacantes busquen vulnerabilidades específicas para esta versión.
+4.  **Falta de la cabecera X-Content-Type-Options:** Permite que los navegadores realicen MIME-sniffing, posibilitando ataques de inyección de contenido.
 
-(ImplementE
+*(Pegue aquí captura de la pestaña "DAST Scan" de Jenkins donde se visualiza el escaneo dinámico corriendo contra el target)*
 
-Pruebas Automatizadas de Seguridad:
+#### Mitigación de Vulnerabilidades
 
-Ejecuta las pruebas de seguridad sobre el código vulnerable y documenta los resultados, identificando claramente las vulnerabilidades encontradas y las acciones tomadas para mitigarlas. (Pegar Pantallazos)
+**Pregunta:** Corrige cualquier vulnerabilidad encontrada en el código proporcionado. (Pegar Pantallazos)
 
-Monitorización del Entorno de Producción:
+**Respuesta:**
+Para mitigar de forma definitiva las vulnerabilidades descritas, se reemplazó el uso del módulo genérico `http.server` de Python por un servidor web personalizado y seguro escrito en Python ([**`server.py`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/server.py)). 
+1.  **CSP y Clickjacking:** Se inyectó la cabecera `Content-Security-Policy: default-src 'self'; frame-ancestors 'none';` y la cabecera `X-Frame-Options: DENY` para evitar el encuadre no autorizado.
+2.  **MIME Sniffing:** Se añadió la cabecera `X-Content-Type-Options: nosniff`.
+3.  **Ocultación de Versión:** Se sobrescribió la función `version_string()` para retornar un valor genérico (`WebServer`), evitando fugas de versiones específicas del software base.
+4.  **Aislamiento de Recursos:** Se configuró el servidor para despachar únicamente archivos ubicados en el directorio `/public`.
+
+*(Pegue aquí captura de pantalla de su IDE con el código de `server.py` implementado y modificado)*
+
+#### Documentación de Revisiones y Mitigación
+
+**Pregunta:** Documenta todas las revisiones de seguridad realizadas, las vulnerabilidades identificadas y las correcciones aplicadas, incluyendo detalles de cómo fueron mitigadas. (Pegar Pantallazos)
+
+**Respuesta:**
+Las revisiones de seguridad se estructuraron de la siguiente manera:
+-   **Análisis Dinámico (DAST):** Implementado con OWASP ZAP en el pipeline. Tras aplicar el parche de seguridad en `server.py` y restringir el contexto con `.dockerignore`, ZAP validó la existencia de las cabeceras defensivas y confirmó que la fuga de versión y el listado de directorios sensibles (como `venv/` y `.git/`) fueron resueltos en su totalidad.
+-   **Gestión de Dependencias (SCA):** Configurado Dependabot en `.github/dependabot.yml` para monitorear librerías de Python e imágenes de Docker base, reduciendo la exposición a exploits conocidos en el código de terceros.
+
+*(Pegue aquí captura de pantalla del explorador de archivos mostrando los reportes ZAP generados en `reports/zap/`)*
+
+#### Pruebas Automatizadas de Seguridad
+
+**Pregunta:** Ejecuta las pruebas de seguridad sobre el código vulnerable y documenta los resultados, identificando claramente las vulnerabilidades encontradas y las acciones tomadas para mitigarlas. (Pegar Pantallazos)
+
+**Respuesta:**
+El pipeline de Jenkins en la fase de `DAST Scan` levanta de forma automatizada los contenedores y ejecuta el escaneo. En el reporte final descargado en `reports/zap/zap-full-report.html` se puede observar la confirmación de que todas las alertas críticas/medias iniciales han sido resueltas tras inyectar las cabeceras HTTP defensivas.
+
+*(Pegue aquí la captura de pantalla del reporte HTML de ZAP abierto en el navegador)*
+
+---
+
+### Monitorización del Entorno de Producción y Evidencias del Stack
 A continuación se detallan y organizan los bloques de evidencia requeridos por la pauta. Reemplace las etiquetas o mantenga las referencias actualizando las imágenes correspondientes en la carpeta de recursos.
 
 ---

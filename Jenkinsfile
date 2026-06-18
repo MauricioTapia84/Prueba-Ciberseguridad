@@ -75,8 +75,9 @@ pipeline {
             exit 1
           fi
 
-          docker run -d --name zap-scan --network ${DAST_NETWORK} \
-            -v $PWD/${REPORTS_DIR}/zap:/zap/wrk:rw \
+          docker run -d --name zap-scan --network ${DAST_NETWORK} --network-alias zap-scan \
+            -e JAVA_OPTS="-Xmx1g" \
+            -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
             ${ZAP_IMAGE} zap.sh -daemon -host 0.0.0.0 -port 8090 \
             -config api.disablekey=true \
             -config api.addrs.addr.name=.* \
@@ -99,21 +100,64 @@ pipeline {
             exit 1
           fi
 
-          APP_URL=${APP_URL}
           zap_curl_json() {
             local url="$1"
-            docker run --rm --network ${DAST_NETWORK} \
-              curlimages/curl:latest --fail --retry 5 --retry-connrefused --retry-delay 2 -sS --max-time 60 "${url}"
+            if [ "$(docker inspect -f '{{.State.Running}}' zap-scan 2>/dev/null || echo false)" != "true" ]; then
+              echo 'ERROR: zap-scan container is not running or has stopped' >&2
+              docker ps -a --filter "name=zap-scan" --format 'table {{.Names}}\t{{.Status}}' 2>/dev/null || true
+              docker logs --tail 50 zap-scan 2>/dev/null || true
+              return 1
+            fi
+
+            if ! docker network inspect "${DAST_NETWORK}" >/dev/null 2>&1; then
+              echo "ERROR: Docker network ${DAST_NETWORK} is unavailable" >&2
+              docker network ls --filter name="${DAST_NETWORK}" --format '{{.Name}} {{.Driver}}' 2>/dev/null || true
+              return 1
+            fi
+
+            local zap_ip
+            zap_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' zap-scan 2>/dev/null)"
+            if [ -z "${zap_ip}" ]; then
+              echo 'ERROR: failed to resolve zap-scan IP address from Docker inspect' >&2
+              docker inspect zap-scan || true
+              return 1
+            fi
+
+            local target_url="$url"
+            if printf '%s' "$url" | grep -q 'zap-scan'; then
+              target_url="${url//zap-scan/${zap_ip}}"
+            fi
+
+            echo "DEBUG: zap_curl_json target_url=${target_url}" >&2
+
+            local output
+            if ! output="$(docker run --rm --network "${DAST_NETWORK}" curlimages/curl:latest \
+              --fail --retry 5 --retry-connrefused --retry-delay 2 -sS --max-time 60 "$target_url" 2>&1)"; then
+              echo "ERROR: curl failed for url=${target_url} (original=${url})" >&2
+              echo "$output" >&2
+              docker ps -a --filter "name=zap-scan" --format 'table {{.Names}}\t{{.Status}}' 2>/dev/null || true
+              docker inspect zap-scan || true
+              docker network inspect "${DAST_NETWORK}" || true
+              return 1
+            fi
+
+            printf '%s' "$output"
           }
 
           zap_json_field() {
             local field="$1"
-            python3 -c "import json, sys; raw=sys.stdin.read(); data=json.loads(raw or '{}'); sys.stdout.write(str(data.get(sys.argv[1], '')));" "${field}"
+            python3 -c 'import json,sys; raw=sys.stdin.read().strip(); print(json.loads(raw).get(sys.argv[1], "") if raw else "")' "$field" || true
           }
 
           SPIDER_ID=""
           for i in $(seq 1 10); do
-            RESPONSE=$(zap_curl_json "http://zap-scan:8090/JSON/spider/action/scan/?url=${APP_URL}" 2>/dev/null || true)
+            RESPONSE=$(zap_curl_json "http://zap-scan:8090/JSON/spider/action/scan/?url=${APP_URL}")
+            curl_ret=$?
+            if [ "$curl_ret" -ne 0 ]; then
+              echo "WARN: zap_curl_json failed for spider scan (exit=$curl_ret), retrying (${i}/10)..." >&2
+              sleep 2
+              continue
+            fi
             printf 'DEBUG: Spider response=%s\n' "$RESPONSE"
             SPIDER_ID=$(printf '%s' "$RESPONSE" | zap_json_field scan | tr -d '[:space:]')
             if [ -n "${SPIDER_ID}" ]; then
@@ -131,7 +175,18 @@ pipeline {
           fi
 
           for i in $(seq 1 60); do
-            SPIDER_STATUS=$(zap_curl_json "http://zap-scan:8090/JSON/spider/view/status/?scanId=${SPIDER_ID}" | zap_json_field status)
+            RAW_SPIDER_STATUS=$(zap_curl_json "http://zap-scan:8090/JSON/spider/view/status/?scanId=${SPIDER_ID}") || {
+              echo "WARN: failed to read spider status, retrying (${i}/60)..." >&2
+              sleep 2
+              continue
+            }
+            if [ -z "${RAW_SPIDER_STATUS}" ]; then
+              echo "WARN: empty spider status response, retrying (${i}/60)..." >&2
+              sleep 2
+              continue
+            fi
+
+            SPIDER_STATUS=$(printf '%s' "$RAW_SPIDER_STATUS" | zap_json_field status | tr -d '[:space:]')
             if [ "${SPIDER_STATUS}" = "100" ]; then
               break
             fi
@@ -141,7 +196,17 @@ pipeline {
 
           ASCAN_ID=""
           for i in $(seq 1 10); do
-            ASCAN_ID=$(zap_curl_json "http://zap-scan:8090/JSON/ascan/action/scan/?url=${APP_URL}" | zap_json_field scan)
+            RAW_ASCAN_RESPONSE=$(zap_curl_json "http://zap-scan:8090/JSON/ascan/action/scan/?url=${APP_URL}") || {
+              echo "WARN: failed to start active scan, retrying (${i}/10)..." >&2
+              sleep 2
+              continue
+            }
+            if [ -z "${RAW_ASCAN_RESPONSE}" ]; then
+              echo "WARN: empty active scan response, retrying (${i}/10)..." >&2
+              sleep 2
+              continue
+            fi
+            ASCAN_ID=$(printf '%s' "$RAW_ASCAN_RESPONSE" | zap_json_field scan | tr -d '[:space:]')
             if [ -n "${ASCAN_ID}" ]; then
               break
             fi
@@ -155,24 +220,42 @@ pipeline {
           fi
 
           for i in $(seq 1 120); do
-            ASCAN_STATUS=$(zap_curl_json "http://zap-scan:8090/JSON/ascan/view/status/?scanId=${ASCAN_ID}" | zap_json_field status)
+            if [ "$(docker inspect -f '{{.State.Running}}' zap-scan 2>/dev/null || echo false)" != "true" ]; then
+              echo 'ERROR: zap-scan container died during active scan' >&2
+              docker ps -a --filter "name=zap-scan" --format 'table {{.Names}}\t{{.Status}}' 2>/dev/null || true
+              docker logs --tail 50 zap-scan 2>/dev/null || true
+              exit 1
+            fi
+
+            RAW_ASCAN_STATUS=$(zap_curl_json "http://zap-scan:8090/JSON/ascan/view/status/?scanId=${ASCAN_ID}") || {
+              echo "WARN: failed to fetch active scan status, retrying (${i}/120)..." >&2
+              sleep 5
+              continue
+            }
+            if [ -z "${RAW_ASCAN_STATUS}" ]; then
+              echo "WARN: empty active scan status response, retrying (${i}/120)..." >&2
+              sleep 5
+              continue
+            fi
+
+            ASCAN_STATUS=$(printf '%s' "$RAW_ASCAN_STATUS" | zap_json_field status | tr -d '[:space:]')
             if [ "${ASCAN_STATUS}" = "100" ]; then
               break
             fi
-            echo "Active scan status: ${ASCAN_STATUS}%"
+            echo "Active scan status: ${ASCAN_STATUS:-?}%"
             sleep 5
           done
 
           docker run --rm --network ${DAST_NETWORK} \
-            -v $PWD/${REPORTS_DIR}/zap:/zap/wrk:rw \
+            -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
             curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/htmlreport/ -o /zap/wrk/zap-full-report.html
 
           docker run --rm --network ${DAST_NETWORK} \
-            -v $PWD/${REPORTS_DIR}/zap:/zap/wrk:rw \
+            -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
             curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/xmlreport/ -o /zap/wrk/zap-full-report.xml
 
           docker run --rm --network ${DAST_NETWORK} \
-            -v $PWD/${REPORTS_DIR}/zap:/zap/wrk:rw \
+            -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
             curlimages/curl:latest -s "http://zap-scan:8090/JSON/core/view/alerts/?baseurl=${APP_URL}" -o /zap/wrk/zap-full-report.json
         '''
       }

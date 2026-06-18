@@ -53,7 +53,7 @@ pipeline {
 
     stage('DAST Scan') {
       steps {
-        sh '''
+        sh '''#!/bin/bash
           set -euo pipefail
           docker network inspect ${DAST_NETWORK} >/dev/null 2>&1 || docker network create -d bridge ${DAST_NETWORK}
           docker rm -f app-under-test zap-scan || true

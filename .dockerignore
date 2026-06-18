@@ -1,0 +1,14 @@
+.git
+venv
+.pytest_cache
+reports
+__pycache__
+*.docx
+*.jpeg
+*.jpg
+*.png
+Dockerfile
+Dockerfile.jenkins
+Jenkinsfile
+docker-compose.yml
+docker-compose.dind.yml

@@ -4,6 +4,7 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt || true
 COPY . .
+RUN mkdir -p public && echo '<html><head><title>App Under Test</title></head><body><h1>App Under Test</h1><p>Welcome to the test application.</p></body></html>' > public/index.html
 EXPOSE 8080
 # Simple default server so ZAP can access an HTTP endpoint during testing.
-CMD ["python3", "-m", "http.server", "8080"]
+CMD ["python3", "-m", "http.server", "8080", "--directory", "public"]

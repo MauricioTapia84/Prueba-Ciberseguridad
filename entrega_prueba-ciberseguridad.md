@@ -8,6 +8,7 @@
 - **RUT:** 20096446-2
 - **Docente:** Marco Antonio Perelli
 - **Fecha de entrega:** 17-junio-2026
+- **Github:** https://github.com/MauricioTapia84/Prueba-Ciberseguridad
 
 ---
 
@@ -281,7 +282,6 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
 
 ![1781794174838](image/entrega_prueba-ciberseguridad/1781794174838.png)
 
-
 ---
 
 #### EVIDENCIA C: Mitigación y Corrección de Vulnerabilidades
@@ -318,11 +318,15 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
   2. Entra a Grafana (`http://localhost:3000`), ingresa a los paneles de Prometheus o de salud del sistema, y toma captura de las gráficas cargadas con datos en tiempo real.
 * **Espacio para imágenes:**
 
-*(Pegue aquí captura de la pestaña targets de Prometheus)*
-![Prometheus Targets UP](image/entrega_prueba-ciberseguridad/1781790469408.png)
+![1781799381816](image/entrega_prueba-ciberseguridad/1781799381816.png)
 
-*(Pegue aquí captura del Dashboard de Grafana en el navegador)*
-![Grafana Dashboard](ruta/a/evidencia-4.png)
+![1781799431725](image/entrega_prueba-ciberseguridad/1781799431725.png)
+
+![1781799515108](image/entrega_prueba-ciberseguridad/1781799515108.png)
+
+![1781798203625](image/entrega_prueba-ciberseguridad/1781798203625.png)
+
+![1781800064102](image/entrega_prueba-ciberseguridad/1781800064102.png)
 
 ---
 
@@ -344,8 +348,7 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
   prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:17] "GET / HTTP/1.1" 200 -
   ```
 - **Evidencia 3:** Captura de los archivos de reportes generados en el directorio local `reports/zap/`.
-  *(Pegue aquí captura de su explorador de archivos mostrando la carpeta reports/zap/)*
-  ![Listado de Reportes en reports/zap/](ruta/a/evidencia-6.png)
+  ![1781799290253](image/entrega_prueba-ciberseguridad/1781799290253.png)
 
 ---
 
@@ -358,8 +361,7 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
   2. Si has subido el proyecto a GitHub, ve a la pestaña **Insights -> Dependency graph -> Dependabot** de tu repositorio de GitHub para mostrar que el servicio está activo y escaneando las dependencias.
 * **Espacio para imágenes:**
 
-*(Pegue aquí captura de pantalla del archivo .github/dependabot.yml o del panel de Dependabot en GitHub)*
-![Dependabot Config](ruta/a/evidencia-7.png)
+![1781799335463](image/entrega_prueba-ciberseguridad/1781799335463.png)
 
 ### 6.3. Archivos de evidencia generados
 

@@ -5,3 +5,4 @@ reports/zap/
 venv/
 __pycache__/
 *.pyc
+image

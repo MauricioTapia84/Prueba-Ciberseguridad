@@ -146,6 +146,7 @@ El escaneo ZAP se realiza con el script `run-dast.sh` y genera reportes en:
 ### 5.7. Gestión de Dependencias (Dependabot)
 
 Para mitigar riesgos asociados a dependencias obsoletas o vulnerables, se configuró la herramienta nativa de GitHub **Dependabot** mediante el archivo `.github/dependabot.yml`.
+
 - **Ecosistemas Monitoreados:**
   - `pip` (Python): Escaneo semanal del archivo `requirements.txt` para asegurar que las librerías utilizadas (como `pytest`) no presenten vulnerabilidades conocidas (CVEs).
   - `docker` (Imágenes base): Monitoreo de actualizaciones para la imagen `python:3.12-slim` declarada en el Dockerfile.
@@ -195,47 +196,33 @@ docker compose logs --tail 50 app-under-test
 
 ### 6.2. Evidencias de resultados
 
-Crea un pipeline de CI/CD en Jenkins que incluya las siguientes etapas: construcción, pruebas y despliegue. (Pegar Pantallazos)
-
-![1781741689788](image/entrega_prueba-ciberseguridad/1781741689788.png)
-
-![1781742535772](image/entrega_prueba-ciberseguridad/1781742535772.png)
-
-![1781742657083](image/entrega_prueba-ciberseguridad/1781742657083.png)
-
-![1781742753428](image/entrega_prueba-ciberseguridad/1781742753428.png)
-
-![1781742918942](image/entrega_prueba-ciberseguridad/1781742918942.png)
-
-![1781743469053](image/entrega_prueba-ciberseguridad/1781743469053.png)
-
-![1781790469408](image/entrega_prueba-ciberseguridad/1781790469408.png)
-
 #### Revisiones de seguridad en el ciclo de vida (SDLC)
 
 **Pregunta:** Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo para identificar y mitigar vulnerabilidades. (Pegar Pantallazos)
 
 **Respuesta:**
 Para aplicar seguridad continua, se configuró un pipeline de integración en Jenkins que realiza análisis de vulnerabilidades automatizados. En el último análisis DAST ejecutado contra el código proporcionado, se identificaron las siguientes vulnerabilidades en la etapa de pruebas dinámicas (ver detalle de reportes en la carpeta `reports/zap/`):
-1.  **Falta de cabeceras de Content Security Policy (CSP):** Permite ataques de inyección de código y Cross-Site Scripting (XSS).
-2.  **Falta de cabeceras de protección contra Clickjacking (X-Frame-Options):** Permite a atacantes cargar la aplicación dentro de frames maliciosos.
-3.  **Fuga de información de la versión del servidor en la cabecera `Server`:** Expone que se está utilizando `SimpleHTTP/0.6 Python/3.12.13`, facilitando que atacantes busquen vulnerabilidades específicas para esta versión.
-4.  **Falta de la cabecera X-Content-Type-Options:** Permite que los navegadores realicen MIME-sniffing, posibilitando ataques de inyección de contenido.
 
-*(Pegue aquí captura de la pestaña "DAST Scan" de Jenkins donde se visualiza el escaneo dinámico corriendo contra el target)*
+1. **Falta de cabeceras de Content Security Policy (CSP):** Permite ataques de inyección de código y Cross-Site Scripting (XSS).
+2. **Falta de cabeceras de protección contra Clickjacking (X-Frame-Options):** Permite a atacantes cargar la aplicación dentro de frames maliciosos.
+3. **Fuga de información de la versión del servidor en la cabecera `Server`:** Expone que se está utilizando `SimpleHTTP/0.6 Python/3.12.13`, facilitando que atacantes busquen vulnerabilidades específicas para esta versión.
+4. **Falta de la cabecera X-Content-Type-Options:** Permite que los navegadores realicen MIME-sniffing, posibilitando ataques de inyección de contenido.
+
+![1781794707403](image/entrega_prueba-ciberseguridad/1781794707403.png)
 
 #### Mitigación de Vulnerabilidades
 
 **Pregunta:** Corrige cualquier vulnerabilidad encontrada en el código proporcionado. (Pegar Pantallazos)
 
 **Respuesta:**
-Para mitigar de forma definitiva las vulnerabilidades descritas, se reemplazó el uso del módulo genérico `http.server` de Python por un servidor web personalizado y seguro escrito en Python ([**`server.py`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/server.py)). 
-1.  **CSP y Clickjacking:** Se inyectó la cabecera `Content-Security-Policy: default-src 'self'; frame-ancestors 'none';` y la cabecera `X-Frame-Options: DENY` para evitar el encuadre no autorizado.
-2.  **MIME Sniffing:** Se añadió la cabecera `X-Content-Type-Options: nosniff`.
-3.  **Ocultación de Versión:** Se sobrescribió la función `version_string()` para retornar un valor genérico (`WebServer`), evitando fugas de versiones específicas del software base.
-4.  **Aislamiento de Recursos:** Se configuró el servidor para despachar únicamente archivos ubicados en el directorio `/public`.
+Para mitigar de forma definitiva las vulnerabilidades descritas, se reemplazó el uso del módulo genérico `http.server` de Python por un servidor web personalizado y seguro escrito en Python ([**`server.py`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/server.py)).
 
-*(Pegue aquí captura de pantalla de su IDE con el código de `server.py` implementado y modificado)*
+1. **CSP y Clickjacking:** Se inyectó la cabecera `Content-Security-Policy: default-src 'self'; frame-ancestors 'none';` y la cabecera `X-Frame-Options: DENY` para evitar el encuadre no autorizado.
+2. **MIME Sniffing:** Se añadió la cabecera `X-Content-Type-Options: nosniff`.
+3. **Ocultación de Versión:** Se sobrescribió la función `version_string()` para retornar un valor genérico (`WebServer`), evitando fugas de versiones específicas del software base.
+4. **Aislamiento de Recursos:** Se configuró el servidor para despachar únicamente archivos ubicados en el directorio `/public`.
+
+![1781794736514](image/entrega_prueba-ciberseguridad/1781794736514.png)
 
 #### Documentación de Revisiones y Mitigación
 
@@ -243,10 +230,13 @@ Para mitigar de forma definitiva las vulnerabilidades descritas, se reemplazó e
 
 **Respuesta:**
 Las revisiones de seguridad se estructuraron de la siguiente manera:
--   **Análisis Dinámico (DAST):** Implementado con OWASP ZAP en el pipeline. Tras aplicar el parche de seguridad en `server.py` y restringir el contexto con `.dockerignore`, ZAP validó la existencia de las cabeceras defensivas y confirmó que la fuga de versión y el listado de directorios sensibles (como `venv/` y `.git/`) fueron resueltos en su totalidad.
--   **Gestión de Dependencias (SCA):** Configurado Dependabot en `.github/dependabot.yml` para monitorear librerías de Python e imágenes de Docker base, reduciendo la exposición a exploits conocidos en el código de terceros.
 
-*(Pegue aquí captura de pantalla del explorador de archivos mostrando los reportes ZAP generados en `reports/zap/`)*
+- **Análisis Dinámico (DAST):** Implementado con OWASP ZAP en el pipeline. Tras aplicar el parche de seguridad en `server.py` y restringir el contexto con `.dockerignore`, ZAP validó la existencia de las cabeceras defensivas y confirmó que la fuga de versión y el listado de directorios sensibles (como `venv/` y `.git/`) fueron resueltos en su totalidad.
+- **Gestión de Dependencias (SCA):** Configurado Dependabot en `.github/dependabot.yml` para monitorear librerías de Python e imágenes de Docker base, reduciendo la exposición a exploits conocidos en el código de terceros.
+
+![1781796283852](image/entrega_prueba-ciberseguridad/1781796283852.png)
+
+![1781796311474](image/entrega_prueba-ciberseguridad/1781796311474.png)
 
 #### Pruebas Automatizadas de Seguridad
 
@@ -255,11 +245,12 @@ Las revisiones de seguridad se estructuraron de la siguiente manera:
 **Respuesta:**
 El pipeline de Jenkins en la fase de `DAST Scan` levanta de forma automatizada los contenedores y ejecuta el escaneo. En el reporte final descargado en `reports/zap/zap-full-report.html` se puede observar la confirmación de que todas las alertas críticas/medias iniciales han sido resueltas tras inyectar las cabeceras HTTP defensivas.
 
-*(Pegue aquí la captura de pantalla del reporte HTML de ZAP abierto en el navegador)*
+![1781794647976](image/entrega_prueba-ciberseguridad/1781794647976.png)
 
 ---
 
 ### Monitorización del Entorno de Producción y Evidencias del Stack
+
 A continuación se detallan y organizan los bloques de evidencia requeridos por la pauta. Reemplace las etiquetas o mantenga las referencias actualizando las imágenes correspondientes en la carpeta de recursos.
 
 ---
@@ -274,17 +265,22 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
 ![Pipeline Jenkins - Ejecución Exitosa](image/entrega_prueba-ciberseguridad/1781741689788.png)
 ![Pipeline Jenkins - Detalle de Fases](image/entrega_prueba-ciberseguridad/1781742535772.png)
 
+![1781794289953](image/entrega_prueba-ciberseguridad/1781794289953.png)
+
 ---
 
 #### EVIDENCIA B: Revisiones de Seguridad Continua en el SDLC (Análisis DAST)
 
 **Requisito:** Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo.
 
-* **¿Dónde tomar el pantallazo?:** En la interfaz web de Jenkins, ingresa a la ejecución más reciente del Pipeline, haz clic en la sección de la etapa de **DAST Scan** y captura los logs donde se muestra que el Spidering de ZAP y el Escaneo Activo (`ascan`) corrieron e identificaron URLs.
 * **Espacio para imágenes:**
 
-*(Pegue aquí captura de logs de Jenkins en la fase DAST Scan o la consola de logs)*
-![Logs de Jenkins - DAST Scan](image/entrega_prueba-ciberseguridad/1781742657083.png)
+![1781794249580](image/entrega_prueba-ciberseguridad/1781794249580.png)
+
+![1781794086317](image/entrega_prueba-ciberseguridad/1781794086317.png)
+
+![1781794174838](image/entrega_prueba-ciberseguridad/1781794174838.png)
+
 
 ---
 
@@ -292,11 +288,11 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
 
 **Requisito:** Corrige cualquier vulnerabilidad encontrada en el código proporcionado.
 
-* **¿Dónde tomar el pantallazo?:** Abre tu editor de código (VS Code, etc.) y toma una captura del archivo [**`Dockerfile`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/Dockerfile) (donde creamos y limitamos el acceso a `/public`) y del archivo [**`.dockerignore`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/.dockerignore) (donde excluimos el entorno `venv/`).
 * **Espacio para imágenes:**
 
-*(Pegue aquí captura de su IDE/Editor de código con el archivo Dockerfile y .dockerignore)*
-![Mitigación - Dockerfile y .dockerignore](image/entrega_prueba-ciberseguridad/1781742753428.png)
+![1781794437170](image/entrega_prueba-ciberseguridad/1781794437170.png)
+
+![1781794424699](image/entrega_prueba-ciberseguridad/1781794424699.png)
 
 ---
 
@@ -309,9 +305,7 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
   2. Toma captura de la pestaña **Artifacts** de Jenkins mostrando los reportes archivados.
 * **Espacio para imágenes:**
 
-*(Pegue aquí captura del reporte HTML de OWASP ZAP cargado en el navegador)*
-![Reporte HTML de ZAP](image/entrega_prueba-ciberseguridad/1781742918942.png)
-![Artifacts de Jenkins en build exitosa](image/entrega_prueba-ciberseguridad/1781743469053.png)
+![1781796398165](image/entrega_prueba-ciberseguridad/1781796398165.png)
 
 ---
 
@@ -356,11 +350,13 @@ A continuación se detallan y organizan los bloques de evidencia requeridos por 
 ---
 
 #### EVIDENCIA G: Gestión de Dependencias con Dependabot
+
 **Requisito:** Implementar la gestión de dependencias en el pipeline utilizando Dependabot.
-*   **¿Dónde tomar el pantallazo?:**
-    1. Abre tu editor de código y captura la configuración del archivo [**`.github/dependabot.yml`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/.github/dependabot.yml).
-    2. Si has subido el proyecto a GitHub, ve a la pestaña **Insights -> Dependency graph -> Dependabot** de tu repositorio de GitHub para mostrar que el servicio está activo y escaneando las dependencias.
-*   **Espacio para imágenes:**
+
+* **¿Dónde tomar el pantallazo?:**
+  1. Abre tu editor de código y captura la configuración del archivo [**`.github/dependabot.yml`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/.github/dependabot.yml).
+  2. Si has subido el proyecto a GitHub, ve a la pestaña **Insights -> Dependency graph -> Dependabot** de tu repositorio de GitHub para mostrar que el servicio está activo y escaneando las dependencias.
+* **Espacio para imágenes:**
 
 *(Pegue aquí captura de pantalla del archivo .github/dependabot.yml o del panel de Dependabot en GitHub)*
 ![Dependabot Config](ruta/a/evidencia-7.png)

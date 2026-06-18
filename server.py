@@ -9,6 +9,23 @@ class SecureHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Configurar para servir desde el directorio público
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
+    def do_GET(self):
+        if self.path == '/metrics':
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+            self.end_headers()
+            metrics = (
+                "# HELP app_up Status of the application (1 for up)\n"
+                "# TYPE app_up gauge\n"
+                "app_up 1\n"
+                "# HELP http_requests_total Total number of HTTP requests\n"
+                "# TYPE http_requests_total counter\n"
+                "http_requests_total 1\n"
+            )
+            self.wfile.write(metrics.encode('utf-8'))
+        else:
+            super().do_GET()
+
     def end_headers(self):
         # 1. Mitigar: Content Security Policy (CSP) Header Not Set
         self.send_header("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none';")

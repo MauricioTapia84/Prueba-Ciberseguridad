@@ -97,7 +97,7 @@ if [ "$ZAP_STARTED" -eq 0 ] && command -v docker >/dev/null 2>&1; then
 	done
 	if [ -n "$ZAP_IMAGE" ]; then
 		echo "Starting ZAP container from $ZAP_IMAGE"
-		docker run --rm -u zap -p 8090:8090 --name zap-scan -d "$ZAP_IMAGE" zap.sh -daemon -port 8090 -host 0.0.0.0 || true
+		docker run --rm -u zap --name zap-scan -d "$ZAP_IMAGE" zap.sh -daemon -port 8090 -host 0.0.0.0 || true
 		ZAP_STARTED=1
 		sleep 8
 	else

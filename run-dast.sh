@@ -16,7 +16,12 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 echo "Iniciando DAST con OWASP ZAP en la red ${NETWORK}..."
-docker run --rm --network "${NETWORK}" -v "$PWD/reports/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
+docker run --rm --network "${NETWORK}" \
+  -e HTTP_PROXY= -e HTTPS_PROXY= -e http_proxy= -e https_proxy= \
+  -e ALL_PROXY= -e all_proxy= \
+  -e NO_PROXY=zap,app-under-test,localhost,127.0.0.1 \
+  -e no_proxy=zap,app-under-test,localhost,127.0.0.1 \
+  -v "$PWD/reports/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
   zap-full-scan.py \
   -t "$APP_TARGET" \
   -r /zap/wrk/zap-full-report.html \

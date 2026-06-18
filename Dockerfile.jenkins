@@ -4,10 +4,14 @@ RUN apt-get update && \
     apt-get install -y python3 python3-venv python3-pip docker.io jq curl procps && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create an auxiliary group matching the host docker GID so the Jenkins user can access the mounted socket
+# Create or reuse a group matching the host Docker GID so the Jenkins user can access the mounted socket
 ARG DOCKER_GID=985
-RUN groupadd -g ${DOCKER_GID} host_docker || true \
-    && usermod -aG host_docker jenkins || true
+RUN if getent group "${DOCKER_GID}" >/dev/null 2>&1; then \
+      DOCKER_GROUP=$(getent group "${DOCKER_GID}" | cut -d: -f1); \
+    else \
+      DOCKER_GROUP=host_docker && groupadd -g "${DOCKER_GID}" "${DOCKER_GROUP}"; \
+    fi && \
+    usermod -aG "${DOCKER_GROUP}" jenkins
 
 USER jenkins
 ENV DOCKER_HOST=unix:///var/run/docker.sock

@@ -4,6 +4,9 @@ services:
       context: .
       dockerfile: Dockerfile.jenkins
     container_name: prueba-ciberseguridad-jenkins
+    user: root
+    group_add:
+      - host_docker
     ports:
       - "8080:8080"
       - "50000:50000"
@@ -13,6 +16,7 @@ services:
       - ./:/workspace:rw
     environment:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+      - DOCKER_HOST=unix:///var/run/docker.sock
     healthcheck:
       test: ["CMD-SHELL", "curl -sSf http://localhost:8080/login >/dev/null 2>&1"]
       interval: 20s

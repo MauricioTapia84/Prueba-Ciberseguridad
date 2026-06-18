@@ -7,11 +7,28 @@ set -euo pipefail
 echo "Limpiando stack anterior (si existe)..."
 docker compose down -v --remove-orphans || true
 
+if ! command -v docker >/dev/null 2>&1; then
+  echo "ERROR: docker no está instalado o no está en PATH. Instala Docker antes de continuar."
+  exit 1
+fi
+
+do_group_info=$(getent group docker || true)
+if [ -z "$do_group_info" ]; then
+  echo "ERROR: el grupo 'docker' no existe en el host. Verifica la instalación de Docker."
+  exit 1
+fi
+DOCKER_GID=$(printf '%s' "$do_group_info" | cut -d: -f3)
+if [ -z "$DOCKER_GID" ]; then
+  echo "ERROR: no se pudo determinar el GID del grupo docker."
+  exit 1
+fi
+
 echo "Construyendo servicios..."
-docker compose build
+echo "  - usando DOCKER_GID=${DOCKER_GID} para Jenkins"
+docker compose build --build-arg DOCKER_GID="${DOCKER_GID}"
 
 echo "Levantando servicios en segundo plano..."
-docker compose up -d
+docker compose up -d --force-recreate
 
 echo "Esperando a que los servicios estén disponibles..."
 wait_for_url() {

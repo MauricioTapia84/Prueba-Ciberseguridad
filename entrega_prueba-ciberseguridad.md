@@ -187,10 +187,106 @@ docker compose logs --tail 50 app-under-test
 
 ### 6.2. Evidencias de resultados
 
+Crea un pipeline de CI/CD en Jenkins que incluya las siguientes etapas: construcción, pruebas y despliegue. (Pegar Pantallazos)
+
+![1781741689788](image/entrega_prueba-ciberseguridad/1781741689788.png)
+
+![1781742535772](image/entrega_prueba-ciberseguridad/1781742535772.png)
+
+![1781742657083](image/entrega_prueba-ciberseguridad/1781742657083.png)
+
+![1781742753428](image/entrega_prueba-ciberseguridad/1781742753428.png)
+
+![1781742918942](image/entrega_prueba-ciberseguridad/1781742918942.png)
+
+![1781743469053](image/entrega_prueba-ciberseguridad/1781743469053.png)
+
+
+Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo para identificar y mitigar vulnerabilidades. (Pegar Pantallazos)
+
+
+Corrige cualquier vulnerabilidad encontrada en el código proporcionado. (Pegar Pantallazos)
+
+
+Documenta todas las revisiones de seguridad realizadas, las vulnerabilidades identificadas y las correcciones aplicadas, incluyendo detalles de cómo fueron mitigadas. (Pegar Pantallazos)
+
+(ImplementE
+
+
+Pruebas Automatizadas de Seguridad:
+
+
+Ejecuta las pruebas de seguridad sobre el código vulnerable y documenta los resultados, identificando claramente las vulnerabilidades encontradas y las acciones tomadas para mitigarlas. (Pegar Pantallazos)
+
+
+Monitorización del Entorno de Producción:
+
+Configura Grafana para la monitorización del entorno de producción. (Pegar Pantallazos)
+
+
+Monitorea el entorno de producción en tiempo real para detectar posibles incidentes de seguridad y documenta los resultados de la monitorización. (Pegar Pantallazos)
+
+
+Documenta todas las actividades de monitorización realizadas y los incidentes de seguridad detectados, incluyendo las acciones tomadas para responder a dichos incidentes. (Pegar Pantallazos)
+
+
 - **Evidencia 1:** Captura de `docker compose ps` con todos los servicios en estado healthy.
-  ![Evidencia 1 - Estado de servicios](ruta/a/evidencia-1.png)
+
+  ![1781741460170](image/entrega_prueba-ciberseguridad/1781741460170.png)
 - **Evidencia 2:** Captura de `docker compose logs app-under-test` mostrando arranque correcto.
-  ![Evidencia 2 - Logs de app-under-test](ruta/a/evidencia-2.png)
+
+  | mauricio@mauricio-Lenovo:~/Documentos/GitHub/Ciencia-Datos/Semestre 1 mención/Ciberseguridad/Pruebas/Prueba 3/Prueba-Ciberseguridad$ docker compose logs --tail 50 app-under-test
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:01] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:07] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:16] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:16] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:17] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:27] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:31] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:31] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:38] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:46] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:46] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:48] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:58] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:01] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:01] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:08] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:16] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:16] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:18] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:29] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:31] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:31] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:39] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:46] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:46] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:49] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:59] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:01] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:01] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:09] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:16] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:16] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:20] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:30] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:31] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:31] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:40] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:46] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:46] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:50] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:00] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:01] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:01] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:11] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:16] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:16] "GET /metrics HTTP/1.1" 404 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:21] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:31] "GET / HTTP/1.1" 200 -
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:31] code 404, message File not found
+  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:31] "GET /metrics HTTP/1.1  
+  
 - **Evidencia 3:** Captura de ZAP generando reportes.
   ![Evidencia 3 - ZAP scan](ruta/a/evidencia-3.png)
 - **Evidencia 4:** Captura de Grafana y Prometheus disponibles en el navegador.

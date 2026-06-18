@@ -246,15 +246,15 @@ pipeline {
             sleep 5
           done
 
-          docker run --rm --network ${DAST_NETWORK} \
+          docker run --rm --user root --network ${DAST_NETWORK} \
             -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
             curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/htmlreport/ -o /zap/wrk/zap-full-report.html
 
-          docker run --rm --network ${DAST_NETWORK} \
+          docker run --rm --user root --network ${DAST_NETWORK} \
             -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
             curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/xmlreport/ -o /zap/wrk/zap-full-report.xml
 
-          docker run --rm --network ${DAST_NETWORK} \
+          docker run --rm --user root --network ${DAST_NETWORK} \
             -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
             curlimages/curl:latest -s "http://zap-scan:8090/JSON/core/view/alerts/?baseurl=${APP_URL}" -o /zap/wrk/zap-full-report.json
         '''

@@ -111,15 +111,16 @@ pipeline {
             python3 - "$field" <<'PY'
 import json
 import sys
+field = sys.argv[1] if len(sys.argv) > 1 else ""
 raw = sys.stdin.read()
 try:
     data = json.loads(raw)
 except (ValueError, TypeError) as exc:
-    sys.stderr.write("DEBUG: invalid JSON for field={}: {}\n".format(sys.argv[1], exc))
-    sys.exit(1)
+    sys.stderr.write(f"DEBUG: invalid JSON for field={field}: {exc}\n")
+    sys.stdout.write("")
+    sys.exit(0)
 if isinstance(data, dict):
-    value = data.get(sys.argv[1], "")
-    sys.stdout.write(str(value))
+    sys.stdout.write(str(data.get(field, "")))
 else:
     sys.stdout.write("")
 PY

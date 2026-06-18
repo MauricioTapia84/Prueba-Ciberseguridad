@@ -205,6 +205,7 @@ Crea un pipeline de CI/CD en Jenkins que incluya las siguientes etapas: construc
 Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo para identificar y mitigar vulnerabilidades. (Pegar Pantallazos)
 
 
+
 Corrige cualquier vulnerabilidad encontrada en el código proporcionado. (Pegar Pantallazos)
 
 

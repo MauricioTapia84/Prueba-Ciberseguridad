@@ -143,6 +143,14 @@ El escaneo ZAP se realiza con el script `run-dast.sh` y genera reportes en:
 - `reports/zap/zap-full-report.json`
 - `reports/zap/zap-full-report.xml`
 
+### 5.7. Gestión de Dependencias (Dependabot)
+
+Para mitigar riesgos asociados a dependencias obsoletas o vulnerables, se configuró la herramienta nativa de GitHub **Dependabot** mediante el archivo `.github/dependabot.yml`.
+- **Ecosistemas Monitoreados:**
+  - `pip` (Python): Escaneo semanal del archivo `requirements.txt` para asegurar que las librerías utilizadas (como `pytest`) no presenten vulnerabilidades conocidas (CVEs).
+  - `docker` (Imágenes base): Monitoreo de actualizaciones para la imagen `python:3.12-slim` declarada en el Dockerfile.
+- **Flujo de Trabajo:** Ante una nueva versión o un parche de seguridad de alguna dependencia, Dependabot abrirá de forma automática un Pull Request (PR) en el repositorio, permitiendo probar la compatibilidad de la actualización mediante los tests automáticos del pipeline antes de fusionar los cambios.
+
 ---
 
 ## 6. Resultados y evidencias
@@ -201,100 +209,125 @@ Crea un pipeline de CI/CD en Jenkins que incluya las siguientes etapas: construc
 
 ![1781743469053](image/entrega_prueba-ciberseguridad/1781743469053.png)
 
+![1781790469408](image/entrega_prueba-ciberseguridad/1781790469408.png)
 
 Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo para identificar y mitigar vulnerabilidades. (Pegar Pantallazos)
 
-
-
 Corrige cualquier vulnerabilidad encontrada en el código proporcionado. (Pegar Pantallazos)
-
 
 Documenta todas las revisiones de seguridad realizadas, las vulnerabilidades identificadas y las correcciones aplicadas, incluyendo detalles de cómo fueron mitigadas. (Pegar Pantallazos)
 
 (ImplementE
 
-
 Pruebas Automatizadas de Seguridad:
-
 
 Ejecuta las pruebas de seguridad sobre el código vulnerable y documenta los resultados, identificando claramente las vulnerabilidades encontradas y las acciones tomadas para mitigarlas. (Pegar Pantallazos)
 
-
 Monitorización del Entorno de Producción:
+A continuación se detallan y organizan los bloques de evidencia requeridos por la pauta. Reemplace las etiquetas o mantenga las referencias actualizando las imágenes correspondientes en la carpeta de recursos.
 
-Configura Grafana para la monitorización del entorno de producción. (Pegar Pantallazos)
+---
 
+#### EVIDENCIA A: Pipeline de CI/CD en Jenkins
 
-Monitorea el entorno de producción en tiempo real para detectar posibles incidentes de seguridad y documenta los resultados de la monitorización. (Pegar Pantallazos)
+**Requisito:** Crear un pipeline de CI/CD en Jenkins que incluya las etapas: construcción, pruebas y despliegue (DAST).
 
+* **¿Dónde tomar el pantallazo?:** Ve a la interfaz web de Jenkins (`http://localhost:8080`), abre tu proyecto **Prueba-CiberSeguridad** y toma captura del historial de builds exitosos o de la vista de etapas del pipeline en verde (Stage View o Blue Ocean).
+* **Espacio para imágenes:**
 
-Documenta todas las actividades de monitorización realizadas y los incidentes de seguridad detectados, incluyendo las acciones tomadas para responder a dichos incidentes. (Pegar Pantallazos)
+![Pipeline Jenkins - Ejecución Exitosa](image/entrega_prueba-ciberseguridad/1781741689788.png)
+![Pipeline Jenkins - Detalle de Fases](image/entrega_prueba-ciberseguridad/1781742535772.png)
 
+---
+
+#### EVIDENCIA B: Revisiones de Seguridad Continua en el SDLC (Análisis DAST)
+
+**Requisito:** Utilizando el código vulnerable proporcionado, realiza revisiones de seguridad continuas en todas las etapas del ciclo de vida del desarrollo.
+
+* **¿Dónde tomar el pantallazo?:** En la interfaz web de Jenkins, ingresa a la ejecución más reciente del Pipeline, haz clic en la sección de la etapa de **DAST Scan** y captura los logs donde se muestra que el Spidering de ZAP y el Escaneo Activo (`ascan`) corrieron e identificaron URLs.
+* **Espacio para imágenes:**
+
+*(Pegue aquí captura de logs de Jenkins en la fase DAST Scan o la consola de logs)*
+![Logs de Jenkins - DAST Scan](image/entrega_prueba-ciberseguridad/1781742657083.png)
+
+---
+
+#### EVIDENCIA C: Mitigación y Corrección de Vulnerabilidades
+
+**Requisito:** Corrige cualquier vulnerabilidad encontrada en el código proporcionado.
+
+* **¿Dónde tomar el pantallazo?:** Abre tu editor de código (VS Code, etc.) y toma una captura del archivo [**`Dockerfile`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/Dockerfile) (donde creamos y limitamos el acceso a `/public`) y del archivo [**`.dockerignore`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/.dockerignore) (donde excluimos el entorno `venv/`).
+* **Espacio para imágenes:**
+
+*(Pegue aquí captura de su IDE/Editor de código con el archivo Dockerfile y .dockerignore)*
+![Mitigación - Dockerfile y .dockerignore](image/entrega_prueba-ciberseguridad/1781742753428.png)
+
+---
+
+#### EVIDENCIA D: Reportes y Resultados de Pruebas Automatizadas de Seguridad
+
+**Requisito:** Ejecuta las pruebas de seguridad sobre el código vulnerable y documenta los resultados y las correcciones.
+
+* **¿Dónde tomar el pantallazo?:**
+  1. Ve a la carpeta `reports/zap/` en tu máquina local y abre el archivo `zap-full-report.html` en tu navegador web. Captura los gráficos o la lista de alertas generadas.
+  2. Toma captura de la pestaña **Artifacts** de Jenkins mostrando los reportes archivados.
+* **Espacio para imágenes:**
+
+*(Pegue aquí captura del reporte HTML de OWASP ZAP cargado en el navegador)*
+![Reporte HTML de ZAP](image/entrega_prueba-ciberseguridad/1781742918942.png)
+![Artifacts de Jenkins en build exitosa](image/entrega_prueba-ciberseguridad/1781743469053.png)
+
+---
+
+#### EVIDENCIA E: Monitorización con Grafana y Prometheus
+
+**Requisito:** Configura Grafana y Prometheus para monitorizar el entorno.
+
+* **¿Dónde tomar el pantallazo?:**
+  1. Entra a Prometheus (`http://localhost:9090/targets`) y toma una captura donde se observe que el target `app-under-test` está en estado **UP**.
+  2. Entra a Grafana (`http://localhost:3000`), ingresa a los paneles de Prometheus o de salud del sistema, y toma captura de las gráficas cargadas con datos en tiempo real.
+* **Espacio para imágenes:**
+
+*(Pegue aquí captura de la pestaña targets de Prometheus)*
+![Prometheus Targets UP](image/entrega_prueba-ciberseguridad/1781790469408.png)
+
+*(Pegue aquí captura del Dashboard de Grafana en el navegador)*
+![Grafana Dashboard](ruta/a/evidencia-4.png)
+
+---
+
+#### EVIDENCIA F: Estado de Salud del Entorno de Contenedores
+
+**Requisito:** Demostrar el correcto levantamiento del stack y la monitorización de incidentes.
+
+* **¿Dónde tomar el pantallazo?:** Abre tu terminal local y ejecuta `docker compose ps` para demostrar que Jenkins, Prometheus, Grafana, App-under-test y ZAP están activos (Healthy/UP).
+* **Espacio para imágenes:**
 
 - **Evidencia 1:** Captura de `docker compose ps` con todos los servicios en estado healthy.
+  ![docker compose ps](image/entrega_prueba-ciberseguridad/1781741460170.png)
+- **Evidencia 2:** Logs de arranque correcto de la aplicación.
 
-  ![1781741460170](image/entrega_prueba-ciberseguridad/1781741460170.png)
-- **Evidencia 2:** Captura de `docker compose logs app-under-test` mostrando arranque correcto.
-
-  | mauricio@mauricio-Lenovo:~/Documentos/GitHub/Ciencia-Datos/Semestre 1 mención/Ciberseguridad/Pruebas/Prueba 3/Prueba-Ciberseguridad$ docker compose logs --tail 50 app-under-test
+  ```
+  mauricio@mauricio-Lenovo:~/Documentos/GitHub/Ciencia-Datos/Semestre 1 mención/Ciberseguridad/Pruebas/Prueba 3/Prueba-Ciberseguridad$ docker compose logs --tail 50 app-under-test
   prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:01] "GET /metrics HTTP/1.1" 404 -
   prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:07] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:16] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:16] "GET /metrics HTTP/1.1" 404 -
   prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:17] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:27] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:31] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:31] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:38] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:46] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:08:46] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:48] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:08:58] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:01] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:01] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:08] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:16] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:16] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:18] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:29] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:31] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:31] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:39] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:46] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:09:46] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:49] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:09:59] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:01] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:01] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:09] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:16] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:16] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:20] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:30] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:31] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:31] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:40] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:46] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:10:46] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:10:50] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:00] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:01] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:01] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:11] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:16] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:16] "GET /metrics HTTP/1.1" 404 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:21] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 127.0.0.1 - - [18/Jun/2026 00:11:31] "GET / HTTP/1.1" 200 -
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:31] code 404, message File not found
-  prueba-ciberseguridad-app-under-test  | 172.18.0.5 - - [18/Jun/2026 00:11:31] "GET /metrics HTTP/1.1  
-  
-- **Evidencia 3:** Captura de ZAP generando reportes.
-  ![Evidencia 3 - ZAP scan](ruta/a/evidencia-3.png)
-- **Evidencia 4:** Captura de Grafana y Prometheus disponibles en el navegador.
-  ![Evidencia 4 - Grafana](ruta/a/evidencia-4.png)
-  ![Evidencia 5 - Prometheus](ruta/a/evidencia-5.png)
-- **Evidencia 6:** Captura de los reportes generados en `reports/zap/`.
-  ![Evidencia 6 - Reportes ZAP](ruta/a/evidencia-6.png)
+  ```
+- **Evidencia 3:** Captura de los archivos de reportes generados en el directorio local `reports/zap/`.
+  *(Pegue aquí captura de su explorador de archivos mostrando la carpeta reports/zap/)*
+  ![Listado de Reportes en reports/zap/](ruta/a/evidencia-6.png)
+
+---
+
+#### EVIDENCIA G: Gestión de Dependencias con Dependabot
+**Requisito:** Implementar la gestión de dependencias en el pipeline utilizando Dependabot.
+*   **¿Dónde tomar el pantallazo?:**
+    1. Abre tu editor de código y captura la configuración del archivo [**`.github/dependabot.yml`**](file:///home/mauricio/Documentos/GitHub/Ciencia-Datos/Semestre%201%20menci%C3%B3n/Ciberseguridad/Pruebas/Prueba%203/Prueba-Ciberseguridad/.github/dependabot.yml).
+    2. Si has subido el proyecto a GitHub, ve a la pestaña **Insights -> Dependency graph -> Dependabot** de tu repositorio de GitHub para mostrar que el servicio está activo y escaneando las dependencias.
+*   **Espacio para imágenes:**
+
+*(Pegue aquí captura de pantalla del archivo .github/dependabot.yml o del panel de Dependabot en GitHub)*
+![Dependabot Config](ruta/a/evidencia-7.png)
 
 ### 6.3. Archivos de evidencia generados
 

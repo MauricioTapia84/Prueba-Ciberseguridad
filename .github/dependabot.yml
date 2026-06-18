@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Gestión de dependencias de Python (pip)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Gestión de actualizaciones para las imágenes de Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"

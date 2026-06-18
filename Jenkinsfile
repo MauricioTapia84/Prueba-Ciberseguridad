@@ -246,17 +246,14 @@ pipeline {
             sleep 5
           done
 
-          docker run --rm --user root --network ${DAST_NETWORK} \
-            -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
-            curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/htmlreport/ -o /zap/wrk/zap-full-report.html
+          docker run --rm --network ${DAST_NETWORK} \
+            curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/htmlreport/ > ${REPORTS_DIR}/zap/zap-full-report.html
 
-          docker run --rm --user root --network ${DAST_NETWORK} \
-            -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
-            curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/xmlreport/ -o /zap/wrk/zap-full-report.xml
+          docker run --rm --network ${DAST_NETWORK} \
+            curlimages/curl:latest -s http://zap-scan:8090/OTHER/core/other/xmlreport/ > ${REPORTS_DIR}/zap/zap-full-report.xml
 
-          docker run --rm --user root --network ${DAST_NETWORK} \
-            -v ${WORKSPACE}/${REPORTS_DIR}/zap:/zap/wrk:rw \
-            curlimages/curl:latest -s "http://zap-scan:8090/JSON/core/view/alerts/?baseurl=${APP_URL}" -o /zap/wrk/zap-full-report.json
+          docker run --rm --network ${DAST_NETWORK} \
+            curlimages/curl:latest -s "http://zap-scan:8090/JSON/core/view/alerts/?baseurl=${APP_URL}" > ${REPORTS_DIR}/zap/zap-full-report.json
         '''
       }
       post {
@@ -282,7 +279,7 @@ pipeline {
 
   post {
     always {
-      archiveArtifacts artifacts: '${REPORTS_DIR}/**', allowEmptyArchive: true
+      archiveArtifacts artifacts: "reports/**", allowEmptyArchive: true
     }
     success {
       echo 'Pipeline completed successfully.'
